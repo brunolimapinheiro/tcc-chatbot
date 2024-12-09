@@ -17,36 +17,38 @@ class ConversationAI {
     }
     async readInformation() {
         try {
+            const filePath = path.resolve(__dirname, '..', 'information_ifpi', 'Information.json');
             const file = await fs.readFile(filePath, 'utf8');
             const data = JSON.parse(file);
             const parts = [];
             if (Array.isArray(data)) {
                 data.forEach((pageContent, index) => {
-                    parts.push(`--- PAGE ${index} ---`);
-                    parts.push(JSON.stringify(pageContent, null, 2));
+                    parts.push(`--- PAGE ${index} ---\n${JSON.stringify(pageContent, null, 2)}`);
                 });
             }
             else {
-                parts.push("--- PAGE 0 ---");
-                parts.push(JSON.stringify(data, null, 2));
+                parts.push("--- PAGE 0 ---\n" + JSON.stringify(data, null, 2));
             }
-            console.log(parts);
-            return parts;
+            return parts.join("\n\n");
         }
         catch (erro) {
             throw erro;
         }
     }
-    createChat() {
+    async createChat() {
         const chat = model.startChat({
             history: [
                 {
                     role: "user",
-                    parts: [this.readInformation()]
+                    parts: [
+                        {
+                            text: await this.readInformation()
+                        }
+                    ]
                 },
                 {
                     role: "user",
-                    parts: [{ text: "responda todas as perguntas em português, seja gentil, você irá responder  as perguntas com base nas informções passadas anteriores que na qual são normas do Instituto federal do Piauí" }]
+                    parts: [{ text: "responda todas as perguntas em português, seja gentil, você irá responder  as perguntas com base nas informções passadas anteriores " }]
                 },
             ],
             generationConfig: {
@@ -65,7 +67,7 @@ class ConversationAI {
     }
     async answer(id, message) {
         try {
-            const chat = this.sessions[id] = this.sessions[id] || this.createChat();
+            const chat = this.sessions[id] = this.sessions[id] || await this.createChat();
             const result = await chat.sendMessage(message);
             const jsonString = JSON.stringify(result.response.text());
             const jsonStringReplace = jsonString.replace(/\\n/g, '\n').replace(/['"]+/g, '');

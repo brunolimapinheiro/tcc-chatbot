@@ -13,9 +13,6 @@ const genAI = new GoogleGenerativeAI(api_key);
 const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
 
-
-
-
 export class ConversationAI implements IConversation{
     private send : TypeSend;
     private sessions: {
@@ -25,54 +22,45 @@ export class ConversationAI implements IConversation{
       this.send = send
       this.sessions = {}
     }
-
-
-  
-
-
          
-    async  readInformation() {
+    async readInformation() {
       try {
+        const filePath = path.resolve(__dirname, '..', 'information_ifpi', 'Information.json');
         const file = await fs.readFile(filePath, 'utf8');
         const data = JSON.parse(file);
         const parts: string[] = [];
-      
+    
         if (Array.isArray(data)) {
           data.forEach((pageContent, index) => {
-            parts.push(`--- PAGE ${index} ---`);
-            parts.push(JSON.stringify(pageContent, null, 2)); 
+            parts.push(`--- PAGE ${index} ---\n${JSON.stringify(pageContent, null, 2)}`);
           });
         } else {
-
-          parts.push("--- PAGE 0 ---");
-          parts.push(JSON.stringify(data, null, 2)); 
+          parts.push("--- PAGE 0 ---\n" + JSON.stringify(data, null, 2));
         }
-        
-        console.log(parts);
-        return parts;
-        
+    
+        return parts.join("\n\n");  
       } catch (erro) {
         throw erro;
       }
     }
+    
 
-
-     createChat(){
+    async createChat(){
       const chat = model.startChat({
         history: [
-
+          {
+            role: "user",
+            parts: [
+              {
+                text: await this.readInformation()
+              }
+            ]
+        },
           {
             role:"user",
-            parts:[this.readInformation()]
-
+            parts:[{text:"responda todas as perguntas em português, seja gentil, você irá responder  as perguntas com base nas informções passadas anteriores "}]
           },
-       
-          {
-            role:"user",
-            parts:[{text:"responda todas as perguntas em português, seja gentil, você irá responder  as perguntas com base nas informções passadas anteriores que na qual são normas do Instituto federal do Piauí"}]
-          },
-
-        
+ 
         ],
         generationConfig: {
           maxOutputTokens: 100,
@@ -81,10 +69,6 @@ export class ConversationAI implements IConversation{
       return chat;
     }
 
-
-
-
-
     async ask(id:string){
           try{
             await this.send(id,{text:'Ola o que você deseja?'});
@@ -92,15 +76,12 @@ export class ConversationAI implements IConversation{
           }catch(error){
             console.log('erro' , error);
           }
-    }
-
-
+      }
 
     async answer(id: string,message:string) {
       
         try {
-        
-          const chat = this.sessions[id]= this.sessions[id]|| this.createChat();
+          const chat = this.sessions[id]= this.sessions[id]|| await this.createChat();
           const result = await chat.sendMessage(message);
           const jsonString = JSON.stringify(result.response.text());
           const jsonStringReplace= jsonString.replace(/\\n/g, '\n').replace(/['"]+/g, '');
