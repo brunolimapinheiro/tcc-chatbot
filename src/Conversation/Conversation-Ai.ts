@@ -1,13 +1,17 @@
 
 import { TypeSend } from "./TypeSend";
 import { IConversation } from "./IConversation";
+import { text } from "stream/consumers";
 
-;
+const fs = require('fs').promises;
+const path = require('path');
+const filePath = path.resolve(__dirname, '..', 'information_ifpi', 'Information.json');
 
-const api_key = process.env.GEMINI_API_KEY;
+const api_key = "AIzaSyB2PUsUN5vt36v7pq_9T6tKdrYupporoQk"
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 const genAI = new GoogleGenerativeAI(api_key);
 const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
 
 
 
@@ -25,17 +29,49 @@ export class ConversationAI implements IConversation{
 
   
 
+
+         
+    async  readInformation() {
+      try {
+        const file = await fs.readFile(filePath, 'utf8');
+        const data = JSON.parse(file);
+        const parts: string[] = [];
+      
+        if (Array.isArray(data)) {
+          data.forEach((pageContent, index) => {
+            parts.push(`--- PAGE ${index} ---`);
+            parts.push(JSON.stringify(pageContent, null, 2)); 
+          });
+        } else {
+
+          parts.push("--- PAGE 0 ---");
+          parts.push(JSON.stringify(data, null, 2)); 
+        }
+        
+        console.log(parts);
+        return parts;
+        
+      } catch (erro) {
+        throw erro;
+      }
+    }
+
+
      createChat(){
       const chat = model.startChat({
         history: [
+
           {
-            role: "user",
-            parts: [{text:"ola meu nome é bruno"}],
+            role:"user",
+            parts:[this.readInformation()]
+
           },
+       
           {
-            role: "model",
-            parts: [{text:"ola bruno"}],
+            role:"user",
+            parts:[{text:"responda todas as perguntas em português, seja gentil, você irá responder  as perguntas com base nas informções passadas anteriores que na qual são normas do Instituto federal do Piauí"}]
           },
+
         
         ],
         generationConfig: {
@@ -51,7 +87,7 @@ export class ConversationAI implements IConversation{
 
     async ask(id:string){
           try{
-            await this.send(id,{text:'ola o que voce deseja?'});
+            await this.send(id,{text:'Ola o que você deseja?'});
 
           }catch(error){
             console.log('erro' , error);
@@ -60,7 +96,7 @@ export class ConversationAI implements IConversation{
 
 
 
-    async answer(id: string,message:string): Promise<string> {
+    async answer(id: string,message:string) {
       
         try {
         
@@ -68,10 +104,10 @@ export class ConversationAI implements IConversation{
           const result = await chat.sendMessage(message);
           const jsonString = JSON.stringify(result.response.text());
           const jsonStringReplace= jsonString.replace(/\\n/g, '\n').replace(/['"]+/g, '');
-          await this.send(id,{text:jsonStringReplace} );
+           await this.send(id,{text:jsonStringReplace} );
         } catch (error) {
           console.error(error);
-          return 'Problemas técnicos.';
+          await this.send(id,{text:"Ops!! estamos com problemas tecnicos tente mais tarde"})
         }
       }
       

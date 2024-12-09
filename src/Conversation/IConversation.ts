@@ -8,5 +8,5 @@ export interface IConversation{
     answer(
         id:string,
         texts:string
-      ): Promise<string>;
+      )
 }
