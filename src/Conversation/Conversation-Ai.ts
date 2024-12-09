@@ -58,12 +58,13 @@ export class ConversationAI implements IConversation{
         },
           {
             role:"user",
-            parts:[{text:"responda todas as perguntas em português, seja gentil, você irá responder  as perguntas com base nas informções passadas anteriores "}]
+            parts:[{text:"responda todas as perguntas em português, seja gentil, você irá responder  as perguntas com base nas informções passadas anteriores use emojis "}]
           },
  
         ],
         generationConfig: {
           maxOutputTokens: 100,
+          temperature:1.0
         },
       })
       return chat;
