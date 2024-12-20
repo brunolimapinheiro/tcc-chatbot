@@ -24,7 +24,9 @@ export class UserPhone{
     if(this.phone.has(id)){
         const directory = path.join(process.cwd());
           const fileName = path.join(directory, "knowPhones")
-          const file = await fs.open(fileName, "a+");   
+          const file = await fs.readFile(fileName, "utf-8");  
+          const data = file.replace(id, "");
+          await fs.writeFile(file,data);
     }
    }
 }
