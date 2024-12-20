@@ -9,9 +9,7 @@ import makeWASocket, {
   import { Boom } from "@hapi/boom";
   import { ConversationAI } from "@/Conversation/Conversation-Ai";
   import { onlyNumber } from "@/common/utis";
-  import path from "path"
-  import fs from "fs/promises"
-  import os from "os"
+
   
   
   export  class WhatsAppConnector {
@@ -92,16 +90,7 @@ import makeWASocket, {
   }
   
     async savePhone(phone:string){ //carregar o arquivo kwonPhone
-      this.knowPhones.add(phone);
-      const directory = path.join(process.cwd());
-      const fileName = path.join(directory, "knowPhones")
-  
-      const file = await fs.open(fileName, "a+");
-     
-  
-  
-      await file.write(phone+os.EOL);
-      await file.close();
+
     }
   
      send=async(id: string, message: AnyMessageContent)=> {

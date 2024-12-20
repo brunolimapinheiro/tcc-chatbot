@@ -3,9 +3,9 @@ import { TypeSend } from "./TypeSend";
 import { IConversation } from "./IConversation";
 import { text } from "stream/consumers";
 
+
 const fs = require('fs').promises;
 const path = require('path');
-const filePath = path.resolve(__dirname, '..', 'information_ifpi', 'Information.json');
 
 const api_key = "AIzaSyB2PUsUN5vt36v7pq_9T6tKdrYupporoQk"
 const { GoogleGenerativeAI } = require("@google/generative-ai");
@@ -63,16 +63,19 @@ export class ConversationAI implements IConversation{
  
         ],
         generationConfig: {
-          maxOutputTokens: 100,
           temperature:1.0
         },
       })
       return chat;
     }
 
+
+    
+
     async ask(id:string){
           try{
-            await this.send(id,{text:'Ola o que você deseja?'});
+            await this.send(id,{text:'Olá!  Sou o seu guia virtual no IFPI. Posso te ajudar a encontrar informações importantes sobre a instituição, como disciplinas, projetos e eventos. ️ O que você gostaria de saber?'});
+            console.log(id);
 
           }catch(error){
             console.log('erro' , error);
@@ -82,11 +85,18 @@ export class ConversationAI implements IConversation{
     async answer(id: string,message:string) {
       
         try {
-          const chat = this.sessions[id]= this.sessions[id]|| await this.createChat();
-          const result = await chat.sendMessage(message);
-          const jsonString = JSON.stringify(result.response.text());
-          const jsonStringReplace= jsonString.replace(/\\n/g, '\n').replace(/['"]+/g, '');
-           await this.send(id,{text:jsonStringReplace} );
+          if(message ==="não"){
+            
+          }
+          else{
+            const chat = this.sessions[id]= this.sessions[id]|| await this.createChat();
+            const result = await chat.sendMessage(message);
+            const jsonString = JSON.stringify(result.response.text());
+            const jsonStringReplace= jsonString.replace(/\\n/g, '\n').replace(/['"]+/g, '');
+            await this.send(id,{text:jsonStringReplace} );
+            const messageContinue = "Se você deseja continua com a conversa pode perguntar caso contrario você digite não";
+            await this.send(id,{text:messageContinue});
+          }
         } catch (error) {
           console.error(error);
           await this.send(id,{text:"Ops!! estamos com problemas tecnicos tente mais tarde"})

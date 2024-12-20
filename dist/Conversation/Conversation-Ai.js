@@ -3,7 +3,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ConversationAI = void 0;
 const fs = require('fs').promises;
 const path = require('path');
-const filePath = path.resolve(__dirname, '..', 'information_ifpi', 'Information.json');
 const api_key = "AIzaSyB2PUsUN5vt36v7pq_9T6tKdrYupporoQk";
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 const genAI = new GoogleGenerativeAI(api_key);
@@ -48,11 +47,12 @@ class ConversationAI {
                 },
                 {
                     role: "user",
-                    parts: [{ text: "responda todas as perguntas em português, seja gentil, você irá responder  as perguntas com base nas informções passadas anteriores " }]
+                    parts: [{ text: "responda todas as perguntas em português, seja gentil, você irá responder  as perguntas com base nas informções passadas anteriores use emojis " }]
                 },
             ],
             generationConfig: {
                 maxOutputTokens: 100,
+                temperature: 1.0
             },
         });
         return chat;
@@ -60,6 +60,7 @@ class ConversationAI {
     async ask(id) {
         try {
             await this.send(id, { text: 'Ola o que você deseja?' });
+            console.log(id);
         }
         catch (error) {
             console.log('erro', error);
