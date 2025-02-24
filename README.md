@@ -1,4 +1,4 @@
-# Chatbot Iamy
+# Chatbot IFPI AI
 
 Bem-vindo ao Chatbot Iamy! Este projeto é um chatbot para WhatsApp desenvolvido com TypeScript, utilizando a biblioteca Baileys para conexão, a API Gemini para respostas de IA e MongoDB para gerenciamento de dados.
 
