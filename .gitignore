@@ -1,0 +1,8 @@
+node_modules
+.env
+build
+dist
+baileys_auth_info
+.vscode
+knowPhones
+logs

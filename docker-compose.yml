@@ -1,0 +1,9 @@
+services:
+  ifpi-chatbot:
+    image: ifpi-chatbot
+    build: .
+    restart: always
+    environment:
+      GEMINI_API_KEY: {REPLACE_WITH_SECRET}
+      MONGODB: {REPLACE_WITH_SECRET}
+
